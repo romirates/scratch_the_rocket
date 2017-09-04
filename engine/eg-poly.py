@@ -8,21 +8,34 @@ WIDTH = 640
 HEIGHT = 480
 class Rocket(engine.GameObject):
     def __init__(self):
-        super().__init__(0, 0, +1, 0, 'rocket', 'black')
+        super().__init__(0, 0, 0, 0, 'rocket', 'black')
         self.speed = 0
-    def heading(self):
-        return 180
+        self.time = 0
     def delete(self):
         super().delete()
         engine.exit_engine()
+    def isoob(self):
+        if super().isoob():
+            self.x = -self.x
     def move(self):
         if self.y >= HEIGHT/4 :
             banner("BOUM!")
             self.delete()
         self.y -= self.speed
-        self.speed += 0.05
-
-
+        self.x = self.x + self.deltax
+        self.speed += 0.04
+        if self.shape == 'rocketBurn' and self.time == 0 :
+            self.shape = 'rocket'
+        else:
+            self.time -= 1
+        if self.y <= -HEIGHT / 2 + 20:
+            if self.speed >= 2:
+                banner("Crash")
+            else:
+                banner("Win")
+    def heading(self):
+        return 90 - 4*self.deltax
+        
 class Sun(engine.GameObject):
     def __init__(self):
         super().__init__(-10, (HEIGHT/2)-40, 0, 0, 'cercle', 'yellow')
@@ -34,8 +47,13 @@ class Ground(engine.GameObject):
 
 def keyboard_cb(key):
     if key == 'space':
-        rocket.shape = "rocket_burn"
-        rocket.speed -= 1
+        if rocket.shape == 'rocket': rocket.shape = 'rocketBurn'
+        rocket.speed -= 1/2
+        rocket.time = 30
+    if key == 'Right':
+        rocket.deltax += 1/2
+    if key == 'Left':
+        rocket.deltax -= 1/2
 
 def banner(s):
 	turtle.home()
@@ -64,37 +82,39 @@ def makeGround():
     turtle.register_shape('ground', s)
     
 def makeRocket():
-    B = 50
+    #make rocket shape
+    B = 10
+    turtle.home()
+    turtle.lt(180)
     turtle.begin_poly()
-    turtle.fd(B)
-    turtle.rt(45)
-    turtle.fd(B*1/4)
-    turtle.rt(90)
-    turtle.fd(B*1/4)
-    turtle.rt(45)
-    turtle.fd(B)
-    
+    s = turtle.Shape("compound")
+    rocketShape = ((B,0), (2*B,0), (2*B,B), (3*B,B), 
+    (2*B,2*B), (2*B, 3*B), (3/2*B,5*B), (B, 3*B),
+    (B, 2*B), (0,B), (B,B), (B,0) )
     turtle.end_poly()
-    poly = turtle.get_poly()
-    turtle.register_shape('rocket', poly)   
+    s.addcomponent(rocketShape, "black", "black")
+    turtle.register_shape('rocket', s)   
     
 def makeRocketBurn():
-    B = 50
+    #make rocket shape
+    B = 10
+    turtle.home()
     turtle.begin_poly()
-    turtle.fd(B)
-    turtle.rt(45)
-    turtle.fd(B*1/4)
-    turtle.rt(90)
-    turtle.fd(B*1/4)
-    turtle.rt(45)
-    turtle.fd(B)
-    """
-    turtle.lt(45)
-    turtle.fd(B*1/8-1)
+    s = turtle.Shape("compound")
+    rocketShape = ((B,0), (2*B,0), (2*B,B), (3*B,B), 
+    (2*B,2*B), (2*B, 3*B), (3/2*B,5*B), (B, 3*B),
+    (B, 2*B), (0,B), (B,B), (B,0) )
     turtle.end_poly()
-    """
-    poly = turtle.get_poly()
-    turtle.register_shape('rocket_burn', poly)
+    #add rocket to the "compound shape"
+    s.addcomponent(rocketShape, "black", "black")
+    
+    #make motor
+    turtle.home()
+    turtle.begin_poly()
+    motorShape = ((3/2*B,0), (B,-1/2*B), (2*B,-1/2*B))
+    turtle.end_poly()
+    s.addcomponent(motorShape, "red", "red")
+    turtle.register_shape('rocketBurn', s)
     
 if __name__ == '__main__':
     engine.init_screen(WIDTH, HEIGHT)
@@ -110,48 +130,4 @@ if __name__ == '__main__':
     engine.add_obj(Sun())
     engine.add_obj(Ground())
     engine.engine()
-"""
-def makeshape():
-	B = 25				# base unit size
-	turtle.begin_poly()
-	turtle.fd(B)			# roof
-	turtle.rt(45)
-	turtle.fd(B * 3/4)		# windshield
-	turtle.lt(45)
-	turtle.fd(B)			# hood
-	turtle.rt(90)
-	turtle.fd(B * 3/4)		# front
-	turtle.rt(90)
-	turtle.fd(B * 1/7)
-	turtle.lt(90)
-	turtle.circle(-B/2, 180)	# front tire
-	turtle.lt(90)
-	turtle.fd(B)
-	turtle.lt(90)
-	turtle.circle(-B/2, 180)	# back tire
-	turtle.lt(90)
-	turtle.fd(B * 1/7)
-	turtle.rt(90)
-	turtle.fd(B * 5/6)		# back
-	turtle.end_poly()
-	poly = turtle.get_poly()
-	turtle.register_shape('car', poly)
-"""
-"""def makeshape():
-    B = 50
-    turtle.begin_poly()
-    turtle.fd(B)
-    turtle.rt(45)
-    turtle.fd(B*1/4)
-    turtle.rt(90)
-    turtle.fd(B*1/4)
-    turtle.rt(45)
-    turtle.fd(B)
-    turtle.rt(45)
-    turtle.fd(B*1/8)
-    turtle.lt(10)
-    turtle.fd(10)
-    poly = turtle.get_poly()
-    turtle.register_shape('rocket', poly)
-    """
 
