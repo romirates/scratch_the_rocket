@@ -166,12 +166,13 @@ def banner(s):
 	time.sleep(3)
 	turtle.undo()
 
-#define the collision between 2 objet with surounding circle
+#define the collision between 2 objets with surounding circles
 def colli_circle(obj1, obj2):
     x1, y1, rad1 = obj1.get_bounding_circle()
     x2, y2, rad2 = obj2.get_bounding_circle()
     d = math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     return d < (rad1 + rad2)
+#define what to do if a collision occurs
 def collision_LR(obj1, obj2):
     if colli_circle(obj1, obj2):
         banner("Burn!")
